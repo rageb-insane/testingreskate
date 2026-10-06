@@ -537,8 +537,9 @@ def build(args):
     reference = shoe_mesh.Reference(g)
     prims, doc = (objfile.load if args.model.lower().endswith('.obj') else gltf.load)(args.model)
     palette = None
-    if not args.texture and 'obj_textures' not in doc and not any(
-            gltf.base_colour_image(doc, m) is not None for m in {p.material for p in prims} if m is not None):
+    textured = bool(args.texture) or any(doc.get('obj_textures', {}).values()) or any(
+        gltf.base_colour_image(doc, m) is not None for m in {p.material for p in prims} if m is not None)
+    if not textured:
         # painted by material colours alone: one flat square per colour, each part pointed at its own
         colours = None
         if args.colours:
@@ -621,7 +622,9 @@ def build(args):
                   'reflections baked by which way each faces)')
     elif 'obj_textures' in doc:                   # an OBJ: its .mtl's map_Kd
         found = doc['obj_textures'].get(material)
-        color_image = Image.open(found) if found else None
+        if not found:
+            raise SystemExit("The shoes' main material has no colour texture in the .mtl; pass one with --texture.")
+        color_image = Image.open(found).convert('RGBA')
     else:
         color_image = gltf.base_colour_image(doc, material)
         if color_image is None:
@@ -680,13 +683,25 @@ def build(args):
     # a high-top placed as modelled: its own collar decides where pants are hidden (make_tuck_mod
     # reads <mod>-tuck.json and gives every pair of pants a region for it, which the item culls)
     own_tuck = None
+    lip = args.tuck_rim == 'lip'
     if (args.fit == 'model' or (args.fit == 'scale' and args.tuck)) and shoe.high_top:
         region_name = shoe_mesh.OWN_TUCK_PREFIX + slugify(args.name)
-        rims = shoe_mesh.own_collar_rims(shoe.positions, base_ref or shape, angle_step=5)
+        rims = shoe_mesh.own_collar_rims(shoe.positions, base_ref or shape, angle_step=5, lip=lip,
+                                         margin=args.tuck_margin / 1000)
         own_tuck = (djb(region_name), region_name, {str(side): {'axis': [float(x) for x in axis], 'rim': [float(x) for x in rim]}
                                                     for side, (axis, rim) in rims.items()})
-        print(f'  pants hidden under its own collar ({rims[1][1].min() * 100:.1f}-{rims[1][1].max() * 100:.1f} cm): '
+        how = ("the lip's real top per 5 deg sector" if lip else 'each 5 deg sector lowered to its lowest neighbour') + \
+              (f', plus up to {args.tuck_margin:g} mm at the heel' if args.tuck_margin else '')
+        print(f'  pants hidden under its own collar ({rims[1][1].min() * 100:.1f}-{rims[1][1].max() * 100:.1f} cm; {how}): '
               f'region {region_name} (rebuild the High_Top_Pants_Tuck mod after this)')
+        if lip:
+            # what the default would have read, so the difference the lip makes is on record
+            safe = shoe_mesh.own_collar_rims(shoe.positions, base_ref or shape, angle_step=5)
+            rim_l = rims[1][1] - args.tuck_margin / 1000 * (1 - np.cos(np.radians(np.arange(72) * 5 + 2.5))) / 2
+            gap = rim_l - safe[1][1]
+            k = int(np.argmax(gap))
+            print(f'  left foot: the lip reads up to {gap[k] * 1000:.1f} mm above the sector-min rim (at {k * 5 + 2.5:.0f} deg '
+                  f'from the toe); lip at the heel, 150-210 deg: ' + ' '.join(f'{h * 100:.1f}' for h in rim_l[30:43]) + ' cm')
         if args.fit == 'scale':
             # the collar the pants tuck into follows the leg as they do (fit 'model' skins the part
             # above the Dunk High's collar the same way)
@@ -700,7 +715,8 @@ def build(args):
     if args.hide_feet == 'auto':
         hide_feet = True
         if args.fit in ('model', 'scale'):
-            low = min(r.min() for _, r in shoe_mesh.own_collar_rims(shoe.positions, base_ref or shape or reference, angle_step=5).values())
+            low = min(r.min() for _, r in shoe_mesh.own_collar_rims(shoe.positions, base_ref or shape or reference,
+                                                                     angle_step=5, lip=lip).values())
             hide_feet = bool(low >= FOOT_REGION_TOP)
     if not hide_feet:
         print("  the body's feet stay drawn (this collar dips under the top of the foot regions the game sneaker hides)")
@@ -1099,6 +1115,15 @@ def main():
                         'top of those foot regions, 13.3 cm, which would leave a see-through gap at the ankle)')
     p.add_argument('--tuck', action='store_true',
                    help='with --fit scale: hide pants under this shoe\'s own collar (--fit model always does)')
+    p.add_argument('--tuck-rim', choices=('sectors', 'lip'), default='sectors',
+                   help='how the collar rim the pants tuck under is measured (with --tuck or --fit model; it also decides '
+                        '--hide-feet auto): sectors lowers each 5-degree sector to the lowest of itself and its neighbours '
+                        '(the default; under a lip that rises quickly, as the Yeezy 2 does at the back, it reads up to 8 mm '
+                        "low, and pants kept down to there drape over the lip); lip takes each sector's own highest point, "
+                        "the lip's real top")
+    p.add_argument('--tuck-margin', type=float, default=0.0, metavar='MM',
+                   help='hide pants up to this many millimetres above the collar lip at the heel, easing to nothing at the '
+                        'toe (tight jeans sit outside the lip at the back and slant across it); default 0')
     p.add_argument('--colours', metavar='JSON', help='a colourway for a model painted by material colours: '
                    '{"part of a material name": "#rrggbb", ..., "*": "#rrggbb"} (tried in order)')
     p.add_argument('--unmirror', nargs='+', metavar='NAME', help='on a foot mirrored from the other, flip the parts '

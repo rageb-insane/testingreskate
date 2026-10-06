@@ -713,17 +713,37 @@ def collar_rim(shape, side, angle_step=10):
     return axis, rim
 
 
-def own_collar_rims(positions, shape, angle_step=10):
+def own_collar_rims(positions, shape, angle_step=10, lip=False, margin=0.0):
     """A shoe's own collar rim per foot ({side: (ankle axis xz, rim height per angle sector)}),
     about the Dunk High's ankle axis and in its sectors, as collar_rim: make_tuck_mod hides the
-    pants wholly under it for a high-top placed as modelled, whose collar is not the Dunk's."""
+    pants wholly under it for a high-top placed as modelled, whose collar is not the Dunk's.
+    By default each sector is lowered to the lowest of itself and its two neighbours, as
+    collar_rim does: safe against a stray high point, but where the lip rises quickly from one
+    sector to the next (the Yeezy 2's does at the back) it reads up to 8 mm under the lip's real
+    top, and pants kept down to that height drape over the lip and cut through it where they
+    slant across it. lip=True takes each sector's own highest point, the lip's real top (a
+    sector no point falls in borrows the lower of its neighbours). margin (metres) is added at
+    the heel, easing to nothing at the toe: pants are then hidden up to that much above the lip
+    at the back, where tight jeans sit outside it, without opening a gap over the tongue."""
     out = {}
+    n = 360 // angle_step
+    toward_back = (1 - np.cos(np.radians((np.arange(n) + 0.5) * angle_step))) / 2   # 0 at the toe, 1 at the heel
     for side in (1, -1):
         axis, _ = collar_rim(shape, side, angle_step)
         foot = positions[positions[:, 0] * side > 0]
         v = foot[:, [0, 2]] - axis
         sector = ((np.degrees(np.arctan2(v[:, 0], v[:, 1])) % 360) // angle_step).astype(int)
-        rim = np.zeros(360 // angle_step)
+        rim = np.zeros(n)
         np.maximum.at(rim, sector, foot[:, 1])
-        out[side] = (axis, np.minimum.reduce([rim, np.roll(rim, 1), np.roll(rim, -1)]))
+        if lip:
+            for _ in range(n):                              # empty sectors borrow the lower neighbour
+                empty = rim <= 0
+                if not empty.any():
+                    break
+                before, after = np.roll(rim, 1), np.roll(rim, -1)
+                near = np.minimum(np.where(before > 0, before, np.inf), np.where(after > 0, after, np.inf))
+                rim = np.where(empty & np.isfinite(near), near, rim)
+        else:
+            rim = np.minimum.reduce([rim, np.roll(rim, 1), np.roll(rim, -1)])
+        out[side] = (axis, rim + margin * toward_back)
     return out

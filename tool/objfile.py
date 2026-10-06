@@ -8,8 +8,14 @@ from gltf import Primitive
 
 
 def load(path):
-    """Returns (primitives, doc). doc['obj_textures'] maps material name -> base colour texture
-    path (map_Kd), found beside the model when the .mtl names a path from another machine."""
+    """Returns (primitives, doc), shaped like gltf.load's. doc['materials'] lists the materials
+    glTF-style ({'name', 'pbrMetallicRoughness': {'baseColorFactor'}}; the .mtl's Kd, taken as
+    linear like a glTF factor, or a light grey without a .mtl), and each primitive's material is
+    an index into it, so a model painted by material colours alone goes through
+    gltf.colour_palette like a textureless .glb (--colours, --gold and --unmirror pick its parts
+    by the .mtl's material names). doc['obj_textures'] maps material index -> base colour texture
+    path (map_Kd), found beside the model when the .mtl names a path from another machine (None
+    when it is nowhere)."""
     folder = os.path.dirname(os.path.abspath(path))
     v, vt, vn = [], [], []
     groups = {}                        # (object, material) -> list of faces [(vi, ti, ni), ...]
@@ -42,6 +48,34 @@ def load(path):
                 mtllibs.append(' '.join(parts[1:]))
     v, vt, vn = np.array(v, np.float64), np.array(vt or [[0, 0]], np.float64), np.array(vn or [[0, 0, 0]], np.float64)
 
+    # the .mtl files: diffuse colour and colour texture per material name
+    colours, maps = {}, {}
+    for lib in mtllibs:
+        p = os.path.join(folder, lib)
+        if not os.path.isfile(p):
+            continue
+        current = None
+        for line in open(p, encoding='utf-8', errors='replace'):
+            parts = line.split()
+            if not parts:
+                continue
+            if parts[0] == 'newmtl':
+                current = ' '.join(parts[1:])
+            elif parts[0] == 'Kd' and current is not None and len(parts) >= 4:
+                colours[current] = [min(max(float(x), 0.0), 1.0) for x in parts[1:4]]
+            elif parts[0] == 'map_Kd' and current is not None:
+                maps[current] = parts[-1]
+    materials, index_of, textures = [], {}, {}
+
+    def material_index(name):
+        if name not in index_of:
+            index_of[name] = len(materials)
+            materials.append({'name': name or '', 'pbrMetallicRoughness': {
+                'baseColorFactor': colours.get(name, [0.8, 0.8, 0.8]) + [1.0]}})
+            if name in maps:
+                textures[index_of[name]] = _find(folder, maps[name])
+        return index_of[name]
+
     def fix(i, n):                     # 1-based, negative = from the end
         return i - 1 if i > 0 else n + i
     prims = []
@@ -65,20 +99,8 @@ def load(path):
             normals = normals / (np.linalg.norm(normals, axis=1, keepdims=True) + 1e-12)
         prims.append(Primitive(name=name, node=None, positions=v[index[:, 0]], normals=normals,
                                uv=uv if (index[:, 1] >= 0).all() else None,
-                               indices=np.array(tris, np.int64), material=material))
-    textures = {}
-    for lib in mtllibs:
-        p = os.path.join(folder, lib)
-        if not os.path.isfile(p):
-            continue
-        current = None
-        for line in open(p, encoding='utf-8', errors='replace'):
-            parts = line.split()
-            if parts and parts[0] == 'newmtl':
-                current = ' '.join(parts[1:])
-            elif parts and parts[0] == 'map_Kd' and current is not None:
-                textures[current] = _find(folder, parts[-1])
-    return prims, {'obj_textures': textures, '_folder': folder}
+                               indices=np.array(tris, np.int64), material=material_index(material)))
+    return prims, {'obj_textures': textures, 'materials': materials, '_folder': folder}
 
 
 def _find(folder, named):
