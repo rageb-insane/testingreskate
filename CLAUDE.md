@@ -119,6 +119,10 @@ and the AJ4.
 - Shoe texture slots: 0bb23445 base_c, 3f4cd4ca base_ny, 00c854f4 msk, 89aaa101 stitches. There's no
   metal input, so chrome and gold are baked into the colour.
 - Game `_ny` normal maps are OpenGL-style, and our encoder expects DirectX. The CGTrader packs are DirectX.
+- `shoe_prep.stand_up` finds the sole as the most flat area at one extreme with little opposite. On the
+  Yeezy 2 that is marginal: the big flat side panel scores nearly as high as the patterned outsole, the
+  GLB passes, the OBJ (same shape) falls the other way and lies on its side. `--up y` (or any axis) says
+  the model already stands and skips the search; the search itself is unchanged for every other model.
 - The game is right-handed: y up, toes at +z, and **x>0 is the LEFT foot**. The game culls back faces.
   Inside-out triangles in a model show as missing pieces in game; `_match_twin_winding` fixes them, gated
   by TWIN_GAP.
@@ -186,9 +190,15 @@ and the AJ4.
      materials named like `8.4-_lace_`, `6.3-_rubber_`, `4.2-_sole_`, `26.13-_tongue_in`, so a colourway
      can colour laces, rubber and the tongue on their own (in the GLB those share other materials);
      `--gold aglet` and `--unmirror Plane` match the same parts as on the GLB. The GLB's nodes carry
-     scale (-1,-1,-1), so the GLB is the OBJ mirrored: a build from the OBJ should put the readable
-     lettering on the model's own foot and `--unmirror` on the mirrored one, which is what the code
-     already does. Check that in game before touching `--unmirror` for the GLB.
+     scale (-1,-1,-1), so the GLB is the OBJ mirrored, confirmed in the cloud: stood up, the OBJ's own
+     foot is the **left** shoe with the same box as the GLB's right (7.86 x 4.60 x 3.27 model units), the
+     GLB's own foot the right. So a build from the OBJ puts the readable lettering on the model's own
+     foot and `--unmirror` flips the mirrored one, which is what the code already does; check that in
+     game before touching `--unmirror` for the GLB. Two things the OBJ needs: `--up y` (`stand_up`'s sole
+     search picks its flat side panel, see below) and the faster `shoe_prep._objects` (it makes 19,594
+     loose pieces against the GLB's 3,198; the old pair-by-pair loop took half an hour on it, the
+     vectorised one 10 s with identical groups). Untested beyond `shoe_prep.prepare`: the GLB's command
+     with the model swapped and `--up y` added is the one to try, first as `--fit scale` only.
 2. **Jeans overlap the back of the collar** in game (skinny jeans). Code done 2026-10-06 in a cloud
    session (no game files there), nothing rebuilt yet; the AJ4 is built the same way and has the same issue.
    - Cause: `shoe_mesh.own_collar_rims` lowered each 5° sector to the lowest of itself and its neighbours.

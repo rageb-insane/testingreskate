@@ -548,7 +548,9 @@ def build(args):
         palette, palette_uv = gltf.colour_palette(prims, doc, colours=colours)
         print(f'  no textures: {len({tuple(c) for c in np.asarray(palette).reshape(-1, 3)})} material colours '
               'made into a palette texture')
-    prims, material = shoe_prep.prepare(prims)
+    up = None if args.up == 'auto' else np.array({'x': (1, 0, 0), 'y': (0, 1, 0), 'z': (0, 0, 1)}[args.up[-1]], float) \
+        * (-1 if args.up[0] == '-' else 1)
+    prims, material = shoe_prep.prepare(prims, up=up)
     # the game indexes a shoe's mesh with 16 bits: both feet together at most 65535 vertices
     per_shoe = MAX_VERTICES // max(len(prims), 1)
     reduced = False
@@ -1097,6 +1099,9 @@ def main():
                         'ball on the floor); nothing is reshaped, so pants may show where it is slimmer; scale: a first '
                         "look, only turned, scaled to the game's foot and set on the floor (no tipping, no pants culling "
                         'beyond the bare foot, skinned by the nearest game-shoe point)')
+    p.add_argument('--up', choices=('auto', 'x', 'y', 'z', '-x', '-y', '-z'), default='auto',
+                   help='the axis the model stands up along when it already stands on its sole (auto: found from the '
+                        "sole, the default; the Yeezy 2 OBJ's flat side panel fools that, it needs y)")
     p.add_argument('--collar', choices=('classic', 'smooth'), default='classic',
                    help='ankle collar fit: classic pulls single points in (the default), smooth draws whole rings in '
                         '(for bulky collars and tall tongues that classic crumples)')

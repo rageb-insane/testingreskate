@@ -44,13 +44,16 @@ def _objects(prims):
             parent[i] = parent[parent[i]]
             i = parent[i]
         return i
-    vol = [np.prod(np.maximum(q.hi - q.lo, 1e-4)) for q in pieces]
-    for i in range(len(pieces)):
-        for j in range(i + 1, len(pieces)):
-            inter = np.minimum(pieces[i].hi, pieces[j].hi) - np.maximum(pieces[i].lo, pieces[j].lo)
-            overlap = np.prod(np.where(inter >= 0, np.maximum(inter, 1e-4), 0))   # flat pieces count as 0.1 mm thick
-            if overlap > 0.2 * min(vol[i], vol[j]):
-                parent[find(i)] = find(j)
+    # every pair's box overlap, a row at a time (an OBJ whose material slots hold thousands of
+    # loose triangles makes 20,000 pieces: pair by pair in Python that took half an hour)
+    lo = np.array([q.lo for q in pieces]).reshape(-1, 3)
+    hi = np.array([q.hi for q in pieces]).reshape(-1, 3)
+    vol = np.prod(np.maximum(hi - lo, 1e-4), axis=1)
+    for i in range(len(pieces) - 1):
+        inter = np.minimum(hi[i], hi[i + 1:]) - np.maximum(lo[i], lo[i + 1:])
+        overlap = np.prod(np.where(inter >= 0, np.maximum(inter, 1e-4), 0), axis=1)   # flat pieces count as 0.1 mm thick
+        for j in np.flatnonzero(overlap > 0.2 * np.minimum(vol[i], vol[i + 1:])) + i + 1:
+            parent[find(i)] = find(int(j))
     groups = {}
     for i, q in enumerate(pieces):
         groups.setdefault(find(i), []).append(q)
@@ -85,17 +88,38 @@ def _merge(group):
     return pos, nrm, uv, tri
 
 
-def stand_up(pos, tri):
-    """Rotation (rows: new x, y, z) that stands a shoe on its sole with the toe toward +z."""
+def stand_up(pos, tri, up=None):
+    """Rotation (rows: new x, y, z) that stands a shoe on its sole with the toe toward +z. up: the
+    model's own up direction when it is known to stand already (the sole search is skipped: on a
+    shoe with a big flat side panel and a patterned outsole, the Yeezy 2, it can pick the side)."""
     centre = pos.mean(0)
     fc, fn, area = _faces(pos, tri)
+    if up is not None:
+        up = np.asarray(up, float) / np.linalg.norm(up)
+    else:
+        up = _sole_up(pos, fc, fn, area)
+    flat = (pos - centre) - np.outer((pos - centre) @ up, up)   # the footprint, seen from above
+    w, vec = np.linalg.eigh(np.cov(flat.T))
+    length = vec[:, np.argmax(w)]
+    length -= up * (length @ up)
+    length /= np.linalg.norm(length)
+    height = pos @ up
+    top = height > height.max() - 0.15 * (height.max() - height.min())
+    along = (pos - centre) @ length
+    toe = -length if along[top].mean() > 0 else length  # the collar rises at the heel
+    x = np.cross(up, toe)
+    return np.array([x / np.linalg.norm(x), up, toe])
 
+
+def _sole_up(pos, fc, fn, area):
+    """The up direction of a shoe in any pose: opposite the sole, found as the most flat area at
+    one extreme with little like it at the opposite extreme (the collar is open); side panels
+    have a twin opposite."""
     def flat_at_extreme(d):
         proj = pos @ d
         reach = proj.max() - 0.12 * (proj.max() - proj.min())
         return (np.abs(fn @ d) > 0.9) & (fc @ d > reach)
-    # every direction on the sphere: the sole is the most flat area at one extreme, with little
-    # like it at the opposite extreme (the collar is open); side panels have a twin opposite
+    # every direction on the sphere
     k = np.arange(800) + 0.5
     polar, turn = np.arccos(1 - 2 * k / 800), np.pi * (1 + 5 ** 0.5) * k
     dirs = np.c_[np.cos(turn) * np.sin(polar), np.sin(turn) * np.sin(polar), np.cos(polar)]
@@ -109,17 +133,7 @@ def stand_up(pos, tri):
     axis = np.eye(3)[np.argmax(np.abs(up))] * np.sign(up[np.argmax(np.abs(up))])
     if up @ axis > np.cos(np.radians(3)):              # already standing on one of the model's axes:
         up = axis                                       # keep it (toe spring tilts the sole's own normal)
-    flat = (pos - centre) - np.outer((pos - centre) @ up, up)   # the footprint, seen from above
-    w, vec = np.linalg.eigh(np.cov(flat.T))
-    length = vec[:, np.argmax(w)]
-    length -= up * (length @ up)
-    length /= np.linalg.norm(length)
-    height = pos @ up
-    top = height > height.max() - 0.15 * (height.max() - height.min())
-    along = (pos - centre) @ length
-    toe = -length if along[top].mean() > 0 else length  # the collar rises at the heel
-    x = np.cross(up, toe)
-    return np.array([x / np.linalg.norm(x), up, toe])
+    return up
 
 
 def which_foot(pos):
@@ -219,8 +233,9 @@ def _match_twin_winding(placed, log, reach=0.004):
         f'{"left" if good > 0 else "right"} shoe\'s) and were turned round; nothing moved')
 
 
-def prepare(prims, log=print):
-    """(primitive-like objects for shoe_mesh.build, material index the shoes use)."""
+def prepare(prims, log=print, up=None):
+    """(primitive-like objects for shoe_mesh.build, material index the shoes use). up: the model's
+    own up direction when it is known to stand on its sole already (see stand_up)."""
     usable = [p for p in prims if p.uv is not None and len(p.indices)]
     if not usable:
         raise SystemExit('The model has no textured (UV-mapped) mesh.')
@@ -247,7 +262,7 @@ def prepare(prims, log=print):
     placed = {}
     for g in shoes:
         pos, nrm, uv, tri = _merge(g)
-        rot = stand_up(pos, tri)
+        rot = stand_up(pos, tri, up)
         pos = (pos - pos.mean(0)) @ rot.T
         nrm = nrm @ rot.T
         if np.linalg.det(rot) < 0:
@@ -258,8 +273,8 @@ def prepare(prims, log=print):
             side = -side
             pos, nrm, uv, tri = _mirrored((pos, nrm, uv, tri))
         placed[side] = (pos, nrm, uv, tri)
-        log(f'  {"left" if side > 0 else "right"} shoe: stood up, toe forward '
-            f'(arch on the inside by {sureness * 1000:.1f} mm)')
+        log(f'  {"left" if side > 0 else "right"} shoe: {"stood up" if up is None else "already standing (--up)"}, toe '
+            f'forward (arch on the inside by {sureness * 1000:.1f} mm)')
     if len(placed) == 1:
         side = next(iter(placed))
         placed[-side] = _mirrored(placed[side])
