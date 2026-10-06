@@ -1,0 +1,172 @@
+{
+ "source_mod": "KP_Creates-Jordan4_Blackcats",
+ "mesh_id": "b858a4f9-8fc1-4489-b430-079e6cb60cbc",
+ "set_id": "439c697c-ecab-41da-94c2-ab46a8137617",
+ "item_preset_id": "b469c131-b0c7-4a83-967f-5f1846d53d35",
+ "assets": {
+  "preset_item.ebx": {
+   "name": "characters/customization/reskate/textureedits/b469c131-b0c7-4a83-967f-5f1846d53d35_ap",
+   "kind": "ebx"
+  },
+  "tex_set_89aaa101.ebx": {
+   "name": "characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_89aaa101-e0f3-4084-30fc-c514010073d2",
+   "kind": "ebx"
+  },
+  "tex_set_0bb23445.ebx": {
+   "name": "characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_0bb23445-4861-79a3-30fc-c5140100e899",
+   "kind": "ebx"
+  },
+  "tex_set_3f4cd4ca.ebx": {
+   "name": "characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_3f4cd4ca-ab37-af17-30fc-c5140100f7d6",
+   "kind": "ebx"
+  },
+  "tex_set_00c854f4.ebx": {
+   "name": "characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_00c854f4-547f-9695-30fc-c5140100edb5",
+   "kind": "ebx"
+  },
+  "preset_set.ebx": {
+   "name": "characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap",
+   "kind": "ebx"
+  },
+  "tex_item_0bb23445.ebx": {
+   "name": "characters/customization/reskate/textureedits/b469c131-b0c7-4a83-967f-5f1846d53d35_ap_0bb23445-4861-79a3-30fc-c5140100e899",
+   "kind": "ebx"
+  },
+  "tex_set_89aaa101.res": {
+   "name": "characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_89aaa101-e0f3-4084-30fc-c514010073d2",
+   "kind": "res",
+   "res_type": 1809719482,
+   "res_meta": "0c000000010000000000000000000000"
+  },
+  "tex_item_0bb23445.res": {
+   "name": "characters/customization/reskate/textureedits/b469c131-b0c7-4a83-967f-5f1846d53d35_ap_0bb23445-4861-79a3-30fc-c5140100e899",
+   "kind": "res",
+   "res_type": 1809719482,
+   "res_meta": "0c000000010000000000000000000000"
+  },
+  "tex_set_0bb23445.res": {
+   "name": "characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_0bb23445-4861-79a3-30fc-c5140100e899",
+   "kind": "res",
+   "res_type": 1809719482,
+   "res_meta": "0c000000010000000000000000000000"
+  },
+  "tex_set_3f4cd4ca.res": {
+   "name": "characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_3f4cd4ca-ab37-af17-30fc-c5140100f7d6",
+   "kind": "res",
+   "res_type": 1809719482,
+   "res_meta": "0c000000010000000000000000000000"
+  },
+  "tex_set_00c854f4.res": {
+   "name": "characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_00c854f4-547f-9695-30fc-c5140100edb5",
+   "kind": "res",
+   "res_type": 1809719482,
+   "res_meta": "0c000000010000000000000000000000"
+  },
+  "chunk_meta": {
+   "96dfe01c-ad70-4698-8d93-57e7a6fba422": "82240968363400b44f7f3e3eec5e45026d657461000f0866697273744d697000000000000000",
+   "96ec15eb-598e-4c3c-ad76-bf94a0362aa1": "82240968363400570a8055067e66fd026d657461000f0866697273744d697000000000000000",
+   "7c4de1c7-6f19-47c0-93eb-cd3741419c13": "82240968363400c1711aafd9084a4f026d657461000f0866697273744d697000000000000000",
+   "7daab4bc-d7d7-4330-ad04-c380c4017cc4": "82240968363400b015f60a4235cd9d026d657461000f0866697273744d697000000000000000",
+   "baf90b89-0e85-498b-b61e-5f8e91ac4c36": "822409683634000fd2f790573a53f2026d657461000f0866697273744d697000000000000000",
+   "a9139761-76d7-49a3-96d8-c0837226c747": "821609683634001fa72020c2817a16026d65746100010000",
+   "9ce3fa67-b0b3-440c-aa73-3f3948f12eda": "821609683634001fa72020c2817a16026d65746100010000",
+   "a7284257-b1ff-4038-90e9-a74479e75153": "821609683634001fa72020c2817a16026d65746100010000",
+   "4c15d7f3-344e-49a8-ad09-8130f287dc24": "821609683634001fa72020c2817a16026d65746100010000",
+   "f9a0de8f-6701-4471-97ba-27f1e1b5e044": "821609683634001fa72020c2817a16026d65746100010000"
+  },
+  "geometry.ebx": {
+   "name": "characters/maincharacters/reskate/b858a4f9-8fc1-4489-b430-079e6cb60cbc_geometry",
+   "kind": "ebx"
+  },
+  "mesh.ebx": {
+   "name": "characters/maincharacters/reskate/b858a4f9-8fc1-4489-b430-079e6cb60cbc_mesh",
+   "kind": "ebx"
+  },
+  "variation.ebx": {
+   "name": "characters/maincharacters/reskate/b858a4f9-8fc1-4489-b430-079e6cb60cbc_variation_2",
+   "kind": "ebx"
+  },
+  "mesh.res": {
+   "name": "characters/maincharacters/reskate/b858a4f9-8fc1-4489-b430-079e6cb60cbc_mesh",
+   "kind": "res",
+   "res_type": 1236358868,
+   "res_meta": "206a0000780100000000000000000000"
+  },
+  "thumb_tool.ebx": {
+   "name": "thumbnail/tool/own_jordan4_blackcats",
+   "kind": "ebx"
+  },
+  "thumb_cdn.ebx": {
+   "name": "thumbnail/cdn/img_own_jordan4_blackcats",
+   "kind": "ebx"
+  },
+  "thumb_tool_lrg.ebx": {
+   "name": "thumbnail/tool/own_jordan4_blackcats_lrg",
+   "kind": "ebx"
+  },
+  "thumb_cdn_lrg.ebx": {
+   "name": "thumbnail/cdn/img_own_jordan4_blackcats_lrg",
+   "kind": "ebx"
+  },
+  "item.ebx": {
+   "name": "items/cust_shoes/own_jordan4_blackcats",
+   "kind": "ebx"
+  },
+  "thumb_tool.res": {
+   "name": "thumbnail/tool/own_jordan4_blackcats",
+   "kind": "res",
+   "res_type": 1809719482,
+   "res_meta": "0c000000090000000000000000000000"
+  },
+  "thumb_tool_lrg.res": {
+   "name": "thumbnail/tool/own_jordan4_blackcats_lrg",
+   "kind": "res",
+   "res_type": 1809719482,
+   "res_meta": "0c000000090000000000000000000000"
+  }
+ },
+ "bundles": {
+  "win32/characters/maincharacters/generic/cas/clothing/unlicensed/generic/footwear/shoe/sneaker/vertclassic/2025/colorways/gen_sneaker_vertclassic_00001_ap_cas_main_bundlereftable": [
+   "ebx:characters/customization/reskate/textureedits/b469c131-b0c7-4a83-967f-5f1846d53d35_ap",
+   "ebx:characters/customization/reskate/cust_shoes/jordan4_blackcats_ap",
+   "ebx:characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_89aaa101-e0f3-4084-30fc-c514010073d2",
+   "ebx:characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_0bb23445-4861-79a3-30fc-c5140100e899",
+   "ebx:characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_3f4cd4ca-ab37-af17-30fc-c5140100f7d6",
+   "ebx:characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_00c854f4-547f-9695-30fc-c5140100edb5",
+   "ebx:characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap",
+   "ebx:characters/customization/reskate/textureedits/b469c131-b0c7-4a83-967f-5f1846d53d35_ap_0bb23445-4861-79a3-30fc-c5140100e899",
+   "res:characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_89aaa101-e0f3-4084-30fc-c514010073d2",
+   "res:characters/customization/reskate/textureedits/b469c131-b0c7-4a83-967f-5f1846d53d35_ap_0bb23445-4861-79a3-30fc-c5140100e899",
+   "res:characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_0bb23445-4861-79a3-30fc-c5140100e899",
+   "res:characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_3f4cd4ca-ab37-af17-30fc-c5140100f7d6",
+   "res:characters/customization/reskate/textureedits/439c697c-ecab-41da-94c2-ab46a8137617_ap_00c854f4-547f-9695-30fc-c5140100edb5",
+   "chunk:96dfe01c-ad70-4698-8d93-57e7a6fba422",
+   "chunk:96ec15eb-598e-4c3c-ad76-bf94a0362aa1",
+   "chunk:7c4de1c7-6f19-47c0-93eb-cd3741419c13",
+   "chunk:7daab4bc-d7d7-4330-ad04-c380c4017cc4",
+   "chunk:baf90b89-0e85-498b-b61e-5f8e91ac4c36"
+  ],
+  "win32/characters/maincharacters/generic/cas/clothing/unlicensed/generic/footwear/shoe/sneaker/vertclassic/2025/gen_sneaker_vertclassic_cas_main_bundlereftable": [
+   "ebx:characters/maincharacters/reskate/b858a4f9-8fc1-4489-b430-079e6cb60cbc_geometry",
+   "ebx:characters/maincharacters/reskate/b858a4f9-8fc1-4489-b430-079e6cb60cbc_mesh",
+   "ebx:characters/maincharacters/reskate/b858a4f9-8fc1-4489-b430-079e6cb60cbc_variation_2",
+   "res:characters/maincharacters/reskate/b858a4f9-8fc1-4489-b430-079e6cb60cbc_mesh",
+   "chunk:a9139761-76d7-49a3-96d8-c0837226c747",
+   "chunk:9ce3fa67-b0b3-440c-aa73-3f3948f12eda",
+   "chunk:a7284257-b1ff-4038-90e9-a74479e75153",
+   "chunk:4c15d7f3-344e-49a8-ad09-8130f287dc24",
+   "chunk:f9a0de8f-6701-4471-97ba-27f1e1b5e044"
+  ],
+  "win32/characters/customization/configs/cas_main_sharedbundle": [
+   "ebx:items/_seasons/0.27.5/ownables/0.27.5_itemcollection",
+   "ebx:thumbnail/tool/own_jordan4_blackcats",
+   "ebx:thumbnail/cdn/img_own_jordan4_blackcats",
+   "ebx:thumbnail/tool/own_jordan4_blackcats_lrg",
+   "ebx:thumbnail/cdn/img_own_jordan4_blackcats_lrg",
+   "ebx:items/cust_shoes/own_jordan4_blackcats",
+   "res:characters/customization/configs/cas_main_bundlereftable",
+   "res:thumbnail/tool/own_jordan4_blackcats",
+   "res:thumbnail/tool/own_jordan4_blackcats_lrg"
+  ]
+ }
+}
